@@ -418,6 +418,38 @@ describe("Bug", () => {
     })
   })
 
+  describe("in issue #10457", () => {
+    it("prevents rendering circle glyph with reversed ranges", async () => {
+      const source = new ColumnDataSource({
+        data: {
+          x: [0, 50, 100],
+          y: [0, 50, 100],
+          r: [20, 20, 20],
+          c: ['red', 'green', 'blue'],
+        },
+      })
+
+      function plot(xr: [number, number], yr: [number, number]) {
+        const title = `xr=${xr} yr=${yr}`
+        const p = fig([200, 200], {x_range: xr, y_range: yr, title, toolbar_location: null})
+        p.circle({
+          x: {field: 'x'},
+          y: {field: 'y'},
+          radius: {field: 'r'},
+          source, line_color: 'black', fill_color: {field: 'c'}, alpha: 0.5})
+        return p
+      }
+
+      const p1 = plot([0, 100], [0, 100])
+      const p2 = plot([100, 0], [0, 100])
+      const p3 = plot([0, 100], [100, 0])
+      const p4 = plot([100, 0], [100, 0])
+
+      const layout = row([p1, p2, p3, p4])
+      await display(layout, [850, 250])
+    })
+  })
+
   describe("in issue #10452", () => {
     it("prevents changing MultiChoice.disabled property", async () => {
       const widget = new MultiChoice({options: ["1", "2", "3"], width: 100, height: 20})
